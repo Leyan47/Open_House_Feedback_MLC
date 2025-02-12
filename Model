@@ -1,0 +1,111 @@
+import pandas as pd
+import numpy as np
+import os
+import time
+# ETL
+from typing import List, Union
+import ast
+# PyTorch
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import random_split
+import torch.utils.data as data 
+from transformers import BertTokenizer, BertForSequenceClassification  # tokenizers  0.20.3  pypi
+from tqdm import tqdm  # process bar
+
+df = pd.read_excel("ManAdjustData.xlsx")
+
+def convert_to_multi_label(labels: Union[List[str], str], all_possible_labels: List[str] = None) -> pd.Series:
+    """
+    Convert single or multiple labels into multi-column one-hot encoding format.
+    """
+    if all_possible_labels is None:
+        all_possible_labels = [
+        '通風採光佳', '學區房', '景觀好', '敦親睦鄰', '環境寧靜',
+        '在意風水', '行動友善', '衛生整潔', '隱私安全性', '養寵物',
+        '交通便利', '投資需求', '裝潢考量', '有車位', '屋況佳', '空間規劃'
+    ]
+    
+    # Convert single string to list if necessary
+    if isinstance(labels, str):
+        # Try to evaluate if it's a string representation of a list
+        try:
+            labels = ast.literal_eval(labels)
+        except:
+            labels = [labels]
+    
+    # Create a series with zeros
+    result = pd.Series(0, index=all_possible_labels)
+    
+    # Set 1 for each label that exists in the input
+    for label in labels:
+        if label in all_possible_labels:
+            result[label] = 1
+            
+    return result
+
+def expand_labels_column(df: pd.DataFrame, label_column: str) -> pd.DataFrame:
+    """
+    Expand a DataFrame column containing labels into multiple one-hot encoded columns.
+    
+    Args:
+        df: Input DataFrame
+        label_column: Name of the column containing labels
+        
+    Returns:
+        pd.DataFrame: Original DataFrame with additional one-hot encoded columns
+    """
+    # Convert each row's labels to one-hot encoding
+    encoded_labels = df[label_column].apply(convert_to_multi_label)
+    
+    # Combine original DataFrame with encoded labels
+    result_df = pd.concat([df, encoded_labels], axis=1)
+    
+    return result_df
+
+class SentenceDataset(data.Dataset):  # which inherits from the torch.utils.data.Dataset class provided by PyTorch
+    """以與 PyTorch 相容的方式建立資料，以利於使用 DataLoader 進行批次、洗牌和載入，作用在於預處理和存取資料的自訂邏輯。."""
+    def __init__(self, database):
+        self.database = database
+        
+    def __len__(self):
+        return self.database.shape[0]
+        
+    def __getitem__(self, idx):
+        # Fetching data like： text, label = dataset[0]
+
+        text = self.database.iloc[idx]["stripMemo"]# Use "stripMemo" as the text column.
+        # Get labels
+        label = self.database.iloc[idx][[
+        '通風採光佳', '學區房', '景觀好', '敦親睦鄰', '環境寧靜',
+        '在意風水', '行動友善', '衛生整潔', '隱私安全性', '養寵物',
+        '交通便利', '投資需求', '裝潢考量', '有車位', '屋況佳', '空間規劃'
+    ]]
+        label = np.array(label, dtype=float)
+        
+        return text, label
+
+# Apply the transformation
+#df = df.dropna(subset=['labels'])
+df_label_onehot = expand_labels_column(df, 'labels')
+
+# Create dataset
+dataset = SentenceDataset(df_label_onehot)
+
+# Check
+df_label_onehot.head()
+print(dataset[0]) 
+
+# Declaring ML Parameters
+lr = 1e-4
+epoch = 4
+batch_size = 8
+
+# 分割數據集與創建加載器
+train_len = int(0.7 * len(dataset))
+valid_len = len(dataset) - train_len
+TrainData1, ValidationData1 = random_split(dataset, [train_len, valid_len])
+train_loader = DataLoader(TrainData1, batch_size=batch_size, shuffle=True, num_workers=0)
+test_loader = DataLoader(ValidationData1, batch_size=batch_size, shuffle=False, num_workers=0)
