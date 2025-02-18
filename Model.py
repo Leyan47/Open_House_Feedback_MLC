@@ -86,7 +86,6 @@ class SentenceDataset(data.Dataset):  # which inherits from the torch.utils.data
         '交通便利', '投資需求', '裝潢考量', '有車位', '屋況佳', '空間規劃'
     ]]
         label = np.array(label, dtype=float)
-        
         return text, label
 
 # Apply the transformation
