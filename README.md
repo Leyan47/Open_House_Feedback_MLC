@@ -19,6 +19,56 @@ This project builds a BERT-based multi-label classification model using buyer fe
 └── README.md             # This documentation file.
 ```
 
+### Project Workflow
+The project follows a three-step process: data preparation, model training, and prediction.
+
+Step 1: Data Preparation (data_process.py)
+This script preprocesses raw text and applies an initial set of labels using a rule-based approach.
+Input: A CSV file containing raw text feedback (e.g., takeToseeTextdata.csv).
+
+Process:
+- Cleans and normalizes the text.
+- Applies labels based on a keyword dictionary.
+- Balances the dataset by downsampling unlabeled entries.
+Output: A new CSV file Rule_Based_Labeling_T2C.csv with pre-labeled data.
+
+To Run:
+`python data_process.py`
+
+Note: For best performance, it's recommended to manually review the labels in Rule_Based_Labeling_T2C.csv and save the final, clean dataset as ManAdjustData.xlsx.
+
+Step 2: Model Training (model.py)
+This script fine-tunes the BERT model on your labeled dataset.
+
+Input: The cleaned, labeled data file ManAdjustData.xlsx.
+Process:
+- Splits the data into training (70%) and validation (30%) sets.
+- Trains the bert-base-chinese model for multi-label classification.
+- Uses early stopping to save the best model based on validation recall.
+
+Output:
+model.pth: The trained model weights.
+tokenizer_path/: The corresponding tokenizer files.
+
+To Run:
+`python model.py`
+
+Step 3: Prediction (Prediction.py)
+Use the trained model to predict labels for new, unseen text data.
+
+Input:
+The saved model model.pth and tokenizer in tokenizer_path/.
+A CSV file with new text data (e.g., processed_output.csv) containing a column named stripMemo.
+
+Process:
+- Loads the model and tokenizer.
+- Generates predictions and probabilities for each label.
+
+Output: Prints the predictions and probabilities to the console.
+
+To Run:
+`python Prediction.py`
+
 
 ### Result Example
 
