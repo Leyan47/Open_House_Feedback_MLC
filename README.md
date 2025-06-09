@@ -8,7 +8,7 @@ This project builds a BERT-based multi-label classification model using buyer fe
 本專案根據仲介輸入的買方帶看回饋，建立BERT多標籤分類模型，協助收斂出買方的彈性需求，進而影響固定剛性需求下的房屋配對排序，提升物件推薦的精準度。
 
 ### File Structure
-'''
+```
 .
 ├── data_process.py       # Script for text preprocessing and rule-based labeling.
 ├── model.py              # Script for model training and evaluation.
@@ -17,7 +17,7 @@ This project builds a BERT-based multi-label classification model using buyer fe
 ├── model.pth             # Saved trained model weights.
 ├── tokenizer_path/       # Saved trained model tokenizer.
 └── README.md             # This documentation file.
-'''
+```
 
 
 ### Result Example
