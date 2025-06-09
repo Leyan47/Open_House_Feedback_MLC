@@ -13,7 +13,7 @@ This project builds a BERT-based multi-label classification model using buyer fe
 ├── data_process.py       # Script for text preprocessing and rule-based labeling.
 ├── model.py              # Script for model training and evaluation.
 ├── Prediction.py         # Script for making predictions with the trained model.
-├── # ManAdjustData.xlsx  # Manually adjusted training data (input for model.py).
+├── # ManAdjustData.xlsx  # Manually adjusted training data (input for model.py), which cannot be uploaded publicly to protect user privacy.
 ├── model.pth             # Saved trained model weights.
 ├── tokenizer_path/       # Saved trained model tokenizer.
 └── README.md             # This documentation file.
